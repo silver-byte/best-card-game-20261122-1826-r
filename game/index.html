@@ -132,7 +132,7 @@ function createDuel(seed, sound = () => {}) {
       if (kind==='draw') changes.push(`Draw ${draw(m,n)}`);
       if (!other.life) break;
     }
-    record(m.name,card.name,changes.join(' · '));
+    record(m.name,card.name,changes.filter(Boolean).join(' · '));
     m.discard.push(card);
     if (!other.life) finish(m,card.name);
     return true;
@@ -144,7 +144,14 @@ function createDuel(seed, sound = () => {}) {
     while (!duel.winner) {
       const legal = rival.hand.filter(c=>c.cost<=rival.energy);
       const high = kind => legal.filter(c=>points(c,kind)).sort((a,b)=>b.cost-a.cost)[0];
-      const lethal = legal.find(c=>points(c,'damage')>=player.life+player.shield);
+      const effectiveLife = player.life+player.shield;
+      const lethal = legal.find(c=>points(c,'damage')>=effectiveLife);
+      const pair = !lethal && legal.flatMap((a,i)=>legal.slice(i+1).map(b=>[a,b])).find(([a,b])=>
+        a.cost+b.cost<=rival.energy && points(a,'damage')+points(b,'damage')>=effectiveLife);
+      if (pair) {
+        for (const card of pair) cast(rival,player,rival.hand.indexOf(card));
+        continue;
+      }
       const heal = rival.life<=8 && legal.filter(c=>points(c,'heal')).sort((a,b)=>a.cost-b.cost)[0];
       const choice = lethal || heal || high('damage') || high('shield') || legal[0];
       if (!choice) break;
@@ -159,15 +166,15 @@ function createDuel(seed, sound = () => {}) {
 }
 // INTERFACE
 const query = new URLSearchParams(location.search);
-const seed = Number(query.get('seed') ?? 1) >>> 0;
 const scene = query.get('shot');
+const seed = Number(query.get('seed') ?? (scene==='play' ? 63 : 1)) >>> 0;
 const table=document.querySelector('#table'), overlay=document.querySelector('#overlay');
 const hint=document.querySelector('#hint'), soundButton=document.querySelector('#sound');
 const glyph=kind=>`<span class="glyph ${kind.toLowerCase()}" aria-hidden="true"></span>`;
 const effectWords={damage:'Deal',burn:'Burn',heal:'Heal',shield:'Shield',draw:'Draw'};
 const replayMoves={
   // Digits are hand keys; zero ends the round. No replay changes a mage directly.
-  play:[3,2,0,3,3,0,5,0,3,3,0,0,3,4],
+  play:[2,0,4,3,0,1,5,0,3,0,2,2,2,0,1,2,3,0],
   win:[5,2,0,4,2,0,1,2,0,2,3,0,5,4,0,1,0,4,2,0,1],
   loss:[4,0,4,4,0,1,1,0,1,1,0,3,4,3,0,1,0,1,0],
 };
@@ -241,6 +248,7 @@ document.addEventListener('click',event=>{
     soundButton.setAttribute('aria-pressed',String(audible));
     soundButton.textContent=audible?'♪ SOUND':'♪ SOUND OFF';
     if(audible) wakeAudio();
+    soundButton.blur();
   } else if(button?.id==='begin') begin();
   else if(button?.id==='end') act(0);
   else if(button?.matches('.card') && button.closest('#table')) act(Number(button.dataset.index)+1);
@@ -248,7 +256,10 @@ document.addEventListener('click',event=>{
 document.addEventListener('keydown',event=>{
   if(event.repeat || event.altKey || event.ctrlKey || event.metaKey || scene==='atlas') return;
   if(event.key==='Enter' && (!duel || duel.winner) && event.target!==soundButton){ event.preventDefault(); begin(); }
-  if(duel && !duel.winner && event.key===' '){ event.preventDefault(); act(0); }
+  const interactive='button, a[href], input, select, textarea, summary, [contenteditable]:not([contenteditable="false"]), [role="button"], [role="link"]';
+  if(duel && !duel.winner && event.key===' ' && !event.target.closest?.(interactive) && !document.activeElement?.closest(interactive)){
+    event.preventDefault(); act(0);
+  }
   if(duel && !duel.winner && /^[1-5]$/.test(event.key)){ event.preventDefault(); act(Number(event.key)); }
 });
 if(scene==='atlas'){
