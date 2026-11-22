@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1280">
+<title>Ember &amp; Tide — Arcane Card Duel</title>
+<style>
+:root{color-scheme:dark;--ink:#f8efd7;--muted:#cec5bf;--gold:#f5d18c;--line:#a87947;--fire:#ff9f78;--water:#99f2ef;--serif:Georgia,'Times New Roman',serif;--sans:'Trebuchet MS',Arial,sans-serif}
+*{box-sizing:border-box} [hidden]{display:none!important} body{margin:0;background:#090d19;color:var(--ink);font:16px var(--sans);display:grid;justify-items:center} button{color:inherit;font:inherit;cursor:pointer} button:focus-visible{outline:3px solid white;outline-offset:2px} button:disabled{cursor:not-allowed}
+#frame{isolation:isolate;position:relative;width:1280px;height:480px;overflow:hidden;border:1px solid #a68158;background:radial-gradient(ellipse at 22% 5%,#53273785,transparent 47%),radial-gradient(ellipse at 80% 96%,#174757ad,transparent 56%),repeating-linear-gradient(115deg,#edc89408 0 1px,transparent 1px 13px),linear-gradient(140deg,#1d152d,#11182d 58%,#10202e)}
+#frame::before,.corners{content:'';position:absolute;inset:8px;pointer-events:none;border:1px solid #aa845a68;z-index:5}.corners{inset:7px;border:0;background:linear-gradient(var(--gold),var(--gold)) left top/41px 2px,linear-gradient(var(--gold),var(--gold)) left top/2px 41px,linear-gradient(var(--gold),var(--gold)) right top/41px 2px,linear-gradient(var(--gold),var(--gold)) right top/2px 41px,linear-gradient(var(--gold),var(--gold)) left bottom/41px 2px,linear-gradient(var(--gold),var(--gold)) left bottom/2px 41px,linear-gradient(var(--gold),var(--gold)) right bottom/41px 2px,linear-gradient(var(--gold),var(--gold)) right bottom/2px 41px;background-repeat:no-repeat}
+header,footer{position:absolute;z-index:6;left:32px;right:32px;display:flex;align-items:center;justify-content:space-between;gap:20px;letter-spacing:.14em;color:var(--gold)}header{top:16px;height:35px;border-bottom:1px solid #b7916c60;padding-bottom:8px}footer{bottom:15px;height:18px;font-size:11px;font-weight:bold;color:#dbc8ad} .brand{font:bold 17px var(--serif);letter-spacing:.13em}.brand i{color:var(--water)}.edition{font-size:12px;font-weight:bold}.edition b{margin:0 12px}.edition,#hint{position:absolute;left:50%;transform:translateX(-50%);white-space:nowrap}#sound{font-size:12px;font-weight:bold;letter-spacing:.12em;padding:4px 10px;border:1px solid #aa855a;background:#292235;color:#ffe3a9}#sound[aria-pressed=false]{color:#c4b5ac}
+#table{position:absolute;inset:61px 32px 37px;display:grid;grid-template-rows:96px 104px 157px;gap:11px}.rail,.log,.turnbox,.rack,.command{min-width:0;position:relative;border:1px solid #bf966867;background:#0b1022b8;box-shadow:inset 0 0 22px #060b1770}
+.foe{display:grid;grid-template-columns:535px 1fr;gap:12px}.middle{display:grid;grid-template-columns:570px 1fr 304px;gap:12px}.bottom{display:grid;grid-template-columns:236px 1fr 180px;gap:12px}
+.rail{--a:var(--fire);--wash:#52263b;display:flex;align-items:center;gap:14px;padding:8px 13px;background:linear-gradient(100deg,var(--wash),#17172b 75%);border-left:3px solid var(--a)}.marine{--a:var(--water);--wash:#16424c;display:grid;grid-template-columns:58px 1fr;grid-template-rows:62px 1fr;gap:0 9px}.marine .portrait{width:55px}.marshal{min-width:0}.eyebrow,.label,.lane-label,.key,.detail,.deckmark{font-weight:700;letter-spacing:.12em;text-transform:uppercase}.eyebrow{font-size:11px;color:var(--a,var(--gold))}.marshal strong{display:block;font: bold 24px/1 var(--serif);margin:2px 0;color:var(--ink)}.marshal small{display:block;font-size:13px;font-weight:bold;letter-spacing:.05em;color:var(--a);white-space:nowrap}.stats{display:flex;gap:6px;margin-left:auto}.marine .stats{grid-column:1/-1;width:100%;margin:auto 0 0;justify-content:space-between}.stat{width:65px;text-align:center;display:grid;gap:2px;padding:3px 0 4px;border-radius:5px;background:#0d1428a9;border:1px solid #dbc09846}.stat b{font:bold 32px/.99 var(--serif);color:var(--ink)}.stat span{font-size:12px;font-weight:800;text-transform:uppercase;color:#dacebb}.stat.lit{background:#6f3029;border-color:#ffae7c;box-shadow:0 0 13px #f67c4f62}.stat.lit b{color:#ffe3a4}
+.portrait,.sigil{aspect-ratio:1;display:grid;place-items:center;color:var(--a);border-radius:50%;position:relative;background:radial-gradient(circle at 50% 45%,var(--wash),#101323 68%);border:1px solid currentColor;box-shadow:0 0 12px var(--wash),inset 0 0 0 4px #111525,inset 0 0 0 5px #d3b5886b}.portrait{width:74px;flex:none}.portrait::before,.sigil::before{content:'';position:absolute;inset:12%;border:1px dashed currentColor;border-radius:50%;opacity:.45}.portrait .glyph{width:63%;height:63%;filter:drop-shadow(0 0 6px currentColor)}.glyph{display:block;width:48px;height:48px}
+.rack{display:flex;align-items:center;justify-content:space-between;padding:7px 15px;background:linear-gradient(100deg,#16162d,#26213b 56%,#141629)}.rack-copy strong{display:block;font: bold 24px var(--serif);color:var(--ink)}.rack-copy small{font-size:13px;color:var(--muted)}.backs{display:flex;gap:10px}.back{width:51px;height:76px;position:relative;display:grid;place-items:center;border:1px solid #d7ae6a;border-radius:5px;color:#ffe1a1;background:repeating-linear-gradient(45deg,#d9af6330 0 1px,transparent 1px 7px),radial-gradient(ellipse,#5b335f,#211d41 70%);box-shadow:inset 0 0 0 3px #201a36,inset 0 0 0 4px #c29a717a,0 3px 7px #080916}.back .glyph{width:33px;height:33px}.back::before,.back::after{content:'✦';position:absolute;font-size:9px;left:calc(50% - 4px)}.back::before{top:5px}.back::after{bottom:5px}.back.spent{border-style:dashed;color:#ae9bab;background:#13172b;box-shadow:none;border-color:#95836888}.back.spent::before,.back.spent::after{display:none}
+.log,.turnbox{padding:7px 13px}.label{display:block;color:var(--gold);font-size:12px;line-height:17px}.log-row{display:grid;grid-template-columns:49px 84px 142px 1fr;align-items:center;height:23px;border-top:1px solid #b6946c3c;font-size:16px;white-space:nowrap}.log-row time{font:700 12px var(--sans);color:#e0bd90}.log-row .Pyra{color:var(--fire)}.log-row .Marin{color:var(--water)}.log-row span:last-child{color:#e2d3c4}.log-empty{color:var(--muted);margin:12px 0 0;font:italic 19px var(--serif)}
+.turnbox{display:flex;align-items:center;justify-content:space-between;gap:10px}.turnbox strong{display:block;font:bold 26px/.95 var(--serif)}.turnbox small{display:block;margin-top:6px;color:var(--muted);font-size:12px}.turn-emblem{color:#f2cd8c;opacity:.8}.energy{background:linear-gradient(115deg,#152c3b,#221b31);padding:7px 12px}.energy strong{font:bold 42px/.95 var(--serif);color:#a9fff6;white-space:nowrap}.energy strong small{display:inline;color:#e3d4cf;font:bold 24px var(--serif)}.pips{display:flex;gap:10px;margin-right:4px}.pip{width:28px;height:28px;border:1px solid #9e8490;transform:rotate(45deg);background:#201f36;box-shadow:inset 0 0 0 4px #171a2e}.pip.on{border-color:#a1ffeb;background:#8efad5;box-shadow:inset 0 0 0 4px #367f80,0 0 16px #71f6d778}
+.hand{display:flex;align-items:stretch;gap:9px;min-width:0}.ember{--a:#ffb283;--base:#863c36;--dark:#35192e}.tide{--a:#9deef8;--base:#285a7a;--dark:#15223c}.thorn{--a:#b9ef99;--base:#39674d;--dark:#172b31}.star{--a:#ffda87;--base:#624d77;--dark:#281d3b}
+.card{flex:0 0 148px;height:157px;min-width:0;position:relative;overflow:hidden;text-align:center;padding:7px 6px 5px;display:grid;justify-items:center;grid-template-rows:51px 16px 25px 1fr;border:1px solid var(--a);border-radius:7px;color:#fff6df;background:radial-gradient(ellipse at 53% 28%,var(--base),transparent 68%),repeating-linear-gradient(140deg,#fce4a116 0 1px,transparent 1px 9px),var(--dark);box-shadow:inset 0 0 0 4px #161529,inset 0 0 0 5px #edc78955,0 5px 9px #0a0d19;transition:transform .14s,filter .14s}.card:not(:disabled):hover,.card:focus-visible{transform:translateY(-5px);filter:brightness(1.17);z-index:2}.card:disabled{border-color:color-mix(in srgb,var(--a) 68%,#131729)}.card .glyph{color:var(--a);width:45px;height:45px;filter:drop-shadow(0 1px 7px var(--a));margin-top:4px}.cost{position:absolute;left:8px;top:8px;display:grid;place-items:center;width:35px;height:35px;background:#141528;border:1px solid var(--a);border-radius:50%;font:bold 26px/1 var(--serif);color:#fff5da}.key{position:absolute;right:8px;top:9px;padding:2px 4px;border:1px solid #eddbad6a;background:#171426;color:#ffe4a7;font-size:10px;letter-spacing:.05em}.element{font-size:12px;font-weight:800;letter-spacing:.17em;text-transform:uppercase;color:var(--a)}.card-name{display:block;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font:bold 18px/25px var(--serif);text-shadow:0 2px 4px #100d1c}.effects{display:grid;align-content:center;align-self:stretch;width:100%;background:#101528c9;border-top:1px solid #f8dc9b72;border-radius:0 0 4px 4px;font-weight:700;font-size:17px;line-height:19px}.effects b{color:var(--a);font-size:19px}.command{display:grid;justify-items:center;align-content:center;gap:10px;padding:10px}.command .label{font-size:11px}.gold-button{border:1px solid #ffe19c;color:#191425;font-weight:900;font-size:18px;letter-spacing:.09em;background:linear-gradient(165deg,#ffedba,#d49b51);box-shadow:inset 0 0 0 3px #7d4c3847,0 4px 15px #03050b7d;padding:9px 14px;border-radius:3px}.gold-button:hover{background:#fff1c3}.command small{color:var(--muted);font-size:12px}
+#overlay{position:absolute;inset:59px 32px 38px;display:grid;grid-template-columns:270px 1fr 270px;align-items:center;text-align:center;background:radial-gradient(ellipse at center,#51354880,transparent 60%),linear-gradient(90deg,#6b252f32,transparent 34% 66%,#19637535);border:1px solid #c89f695e;overflow:hidden}#overlay::before,#overlay::after{content:'';position:absolute;pointer-events:none;inset:50% auto auto 50%;width:590px;height:590px;border:1px solid #e6bb7941;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 14px #e6bb790c,0 0 0 15px #e6bb792e}#overlay::after{width:355px;height:355px;border-style:dashed;box-shadow:none}.seal,.hero{position:relative;z-index:1}.seal{--a:var(--fire);--wash:#7c403b;display:grid;justify-items:center;gap:9px}.seal.sea{--a:var(--water);--wash:#2f737c}.sigil{width:170px}.sigil::after{content:'';position:absolute;inset:-10px;border:1px solid currentColor;border-radius:50%;opacity:.42}.sigil .glyph{width:116px;height:116px;filter:drop-shadow(0 0 12px var(--a))}.seal strong{font: bold 29px/1 var(--serif);color:var(--a);margin-top:7px}.seal small{font-size:12px;font-weight:700;letter-spacing:.15em;color:#ece0ce}.hero .label{letter-spacing:.24em}.hero h1{margin:10px -20px 5px;font: bold 70px/.95 var(--serif);letter-spacing:.035em;color:#ffe5aa;text-shadow:0 3px #704149,0 0 24px #f5ac5b52;white-space:nowrap}.hero h1 i{font-style:italic;color:#b6ecde;font-size:.77em}.hero h2{font: bold 25px var(--serif);margin:7px 0 0;letter-spacing:.14em;text-transform:uppercase}.ruleline{display:flex;align-items:center;justify-content:center;gap:12px;color:var(--gold);margin:12px auto 8px;font-size:13px}.ruleline::before,.ruleline::after{content:'';display:block;width:77px;height:1px;background:linear-gradient(90deg,transparent,var(--line))}.ruleline::after{transform:scaleX(-1)}.hero p{font-size:16px;line-height:1.5;color:#f2e5d2;margin:0 0 12px}.hero .gold-button{padding:8px 21px}.prompt{display:block;color:#ddc7ad;font-size:12px;margin-top:6px}.result h1{font-size:54px;color:#c7f6ad;text-shadow:0 3px #386b55,0 0 25px #a0f28863}.result.loss h1{color:#ffac9b;text-shadow:0 3px #78383c,0 0 25px #f47e6959}.result h2{font-size:21px}.result .log{width:520px;margin:8px auto 9px;text-align:left}.result .log-row{grid-template-columns:43px 64px 119px 1fr;font-size:15px}.seal .final-life{color:var(--a);font:bold 37px/.85 var(--serif)}.seal .final-life small{font: bold 13px var(--sans);letter-spacing:.09em}.seal.fallen{opacity:.68}.atlas{position:absolute;inset:63px 32px 36px;display:grid;gap:10px;align-content:center}.atlas .hand{justify-content:center}.atlas .card{flex-basis:142px}
+.card{flex-basis:147px}.glyph{position:relative;flex:none}.glyph::before,.glyph::after{content:'';position:absolute;inset:0}.glyph::before{background:currentColor}.glyph.ember::before{clip-path:polygon(49% 4%,65% 21%,70% 42%,79% 29%,90% 48%,91% 65%,82% 81%,69% 91%,50% 96%,30% 90%,16% 77%,10% 61%,13% 46%,24% 32%,30% 48%,35% 32%,43% 19%)}.glyph.ember::after{background:#522238;clip-path:polygon(51% 47%,65% 66%,66% 78%,59% 87%,49% 90%,39% 84%,35% 75%,39% 64%,46% 68%)}.glyph.tide::before{clip-path:polygon(5% 64%,17% 52%,30% 51%,44% 38%,53% 23%,69% 15%,82% 18%,92% 27%,80% 28%,72% 35%,74% 46%,86% 55%,97% 55%,93% 67%,82% 76%,69% 78%,54% 70%,42% 69%,29% 77%,17% 77%,7% 72%,20% 70%,30% 64%,20% 62%)}.glyph.tide::after{background:currentColor;opacity:.65;clip-path:polygon(7% 83%,20% 85%,36% 79%,48% 77%,64% 83%,77% 85%,92% 77%,85% 87%,73% 92%,60% 90%,46% 85%,37% 85%,21% 91%,13% 89%)}.glyph.thorn::before{clip-path:polygon(15% 88%,28% 70%,20% 61%,21% 45%,31% 30%,50% 22%,72% 20%,89% 10%,84% 41%,76% 59%,61% 72%,46% 76%,34% 74%,22% 93%)}.glyph.thorn::after{background:#18392f;clip-path:polygon(27% 75%,42% 58%,47% 39%,50% 51%,70% 33%,57% 53%,67% 54%,50% 61%,34% 76%)}.glyph.star::before{clip-path:polygon(50% 3%,61% 38%,95% 50%,61% 61%,50% 97%,38% 61%,4% 50%,38% 38%)}.glyph.star::after{background:#3b2c54;clip-path:polygon(50% 26%,55% 44%,73% 50%,55% 55%,50% 74%,44% 55%,27% 50%,44% 44%)}.glyph.moon::before{border-radius:50%;inset:11%;background:transparent;box-shadow:-8px 4px 0 -2px currentColor;transform:translateX(5%)}.glyph.moon::after{inset:14% 5% 22% 45%;background:currentColor;clip-path:polygon(50% 0,66% 34%,99% 52%,68% 66%,50% 99%,34% 65%,1% 52%,34% 35%)}
+.archive{flex:1;min-width:0;display:grid;align-content:center;justify-items:center;text-align:center;background:linear-gradient(120deg,#172138,#242034);border:1px solid #a4866180;color:#dec69c;gap:6px}.archive .glyph{width:31px;height:31px}.archive strong{font:bold 23px var(--serif);color:var(--ink)}.archive small{font-size:11px;letter-spacing:.08em}
+/* Engraved turn furniture and a stronger scale for the 50% cover previews. */
+.hero h1{font-size:64px}.result h1{font-size:54px}.seal .sigil{outline:6px dotted color-mix(in srgb,var(--a) 35%,transparent);outline-offset:9px}.ruleline{font-weight:700}
+.turnbox:not(.energy){border-left:3px solid #c29c67;background:radial-gradient(ellipse at 91% 52%,#57506a65,transparent 46%),#11162a}.energy{border-left:3px solid #91e2d4}.energy strong{font-size:46px}.energy strong small{font-size:29px}
+.cost{font-size:29px;width:37px;height:37px}.key{font-size:11px}.effects{font-size:18px;line-height:20px}.effects b{font-size:22px}.stat b{font-size:35px}.stat span{font-size:13px}.stat.lit{border-width:2px;padding:2px 0 3px}
+.hand .card:not(:disabled){box-shadow:inset 0 0 0 4px #161529,inset 0 0 0 5px #edc78970,0 0 14px color-mix(in srgb,var(--a) 20%,transparent)}.hand .card:disabled .cost{background:#282131;border-color:#9d8692}.back.spent .glyph{opacity:.31}
+.portrait::after{content:'';position:absolute;bottom:7%;left:30%;right:30%;height:1px;background:currentColor;box-shadow:0 -3px 7px currentColor;opacity:.6}
+</style>
+</head>
+<body>
+<main id="frame" aria-label="Ember &amp; Tide">
+  <div class="corners" aria-hidden="true"></div>
+  <header><span class="brand">◈ &nbsp; EMBER <i>&amp;</i> TIDE</span><span class="edition">THE SOLSTICE DUEL <b>✦</b> THE ASTRAL RING</span><button id="sound" aria-pressed="true">♪ SOUND</button></header>
+  <section id="table" hidden></section>
+  <section id="overlay"></section>
+  <footer><span>✧ &nbsp; THE SOLSTICE DUEL</span><span id="hint">ENTER &nbsp; BEGIN DUEL</span><span>EMBER / TIDE / THORN / STAR &nbsp; ✧</span></footer>
+</main>
+<script>
+'use strict';
+const cards = [
+  ['Ember Bolt','Ember',1,['damage',3]],
+  ['Flame Wave','Ember',2,['damage',5]],
+  ['Inferno','Ember',3,['damage',8]],
+  ['Kindling Curse','Ember',1,['burn',2]],
+  ['Tide Lance','Tide',1,['damage',3]],
+  ['Crushing Surf','Tide',2,['damage',5]],
+  ['Healing Rain','Tide',2,['heal',5]],
+  ['Deep Spring','Tide',1,['heal',3]],
+  ['Thorn Guard','Thorn',1,['shield',4]],
+  ['Briar Wall','Thorn',2,['shield',7]],
+  ['Vine Lash','Thorn',1,['damage',2],['draw',1]],
+  ['Star Fall','Star',3,['damage',7]],
+  ['Star Mend','Star',2,['heal',4],['shield',2]],
+  ['Comet Spark','Star',1,['damage',2]],
+  ['Moon Draught','Star',1,['draw',2]],
+  ['Ash Phoenix','Ember',3,['damage',6],['burn',1]],
+].map(([name,element,cost,...effects]) => ({name,element,cost,effects}));
+
+function mulberry32(a) {
+  return () => {
+    a |= 0;
+    a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function shuffled(pile, next) {
+  for (let i=pile.length-1; i>0; i--) {
+    const j = Math.floor(next() * (i+1));
+    [pile[i],pile[j]] = [pile[j],pile[i]];
+  }
+  return pile;
+}
+const points = (card,kind) => card.effects.find(([k]) => k === kind)?.[1] ?? 0;
+function createDuel(seed, sound = () => {}) {
+  seed = seed >>> 0;
+  function mage(name, stream) {
+    const next = mulberry32(stream >>> 0);
+    return {name,life:20,shield:0,burn:0,energy:0,hand:[],deck:shuffled([...cards,...cards],next),discard:[],next};
+  }
+  const player = mage('Marin',seed), rival = mage('Pyra',seed+7919);
+  const log = [];
+  const duel = {player,rival,log,round:1,winner:null,finisher:'',play,end};
+  const record = (who,card,detail) => log.push({round:duel.round,who,card,detail});
+  function draw(m,n) {
+    let count = 0;
+    while (count<n && m.hand.length<5) {
+      if (!m.deck.length) m.deck = shuffled(m.discard.splice(0),m.next);
+      if (!m.deck.length) break;
+      m.hand.push(m.deck.shift());
+      count++;
+    }
+    return count;
+  }
+  function damage(m,n) {
+    const block = Math.min(m.shield,n), loss = Math.min(m.life,n-block);
+    m.shield -= block;
+    m.life -= loss;
+    if (loss) sound('hurt');
+    return [loss && `−${loss} Life`,block && `−${block} Shield`].filter(Boolean).join(' / ');
+  }
+  function finish(winner,card) {
+    duel.winner = winner;
+    duel.finisher = card;
+    sound(winner === player ? 'win' : 'loss');
+  }
+  function start(m,other) {
+    m.energy = 3;
+    draw(m,1);
+    if (m.burn) {
+      const detail = damage(m,m.burn--);
+      record(m.name,'Burn ticks',detail);
+      if (!m.life) finish(other,'Burn');
+    }
+  }
+  function cast(m,other,index) {
+    const card = m.hand[index];
+    if (duel.winner || !card || card.cost>m.energy) return false;
+    m.energy -= card.cost;
+    m.hand.splice(index,1);
+    sound('play');
+    const changes = [];
+    for (const [kind,n] of card.effects) {
+      if (kind==='damage') changes.push(damage(other,n));
+      if (kind==='burn') { other.burn += n; changes.push(`+${n} Burn`); }
+      if (kind==='shield') { m.shield += n; changes.push(`+${n} Shield`); }
+      if (kind==='heal') { const gain=Math.min(20-m.life,n); m.life+=gain; changes.push(`+${gain} Life`); }
+      if (kind==='draw') changes.push(`Draw ${draw(m,n)}`);
+      if (!other.life) break;
+    }
+    record(m.name,card.name,changes.join(' · '));
+    m.discard.push(card);
+    if (!other.life) finish(m,card.name);
+    return true;
+  }
+  function play(index) { return cast(player,rival,index); }
+  function end() {
+    if (duel.winner) return;
+    start(rival,player);
+    while (!duel.winner) {
+      const legal = rival.hand.filter(c=>c.cost<=rival.energy);
+      const high = kind => legal.filter(c=>points(c,kind)).sort((a,b)=>b.cost-a.cost)[0];
+      const lethal = legal.find(c=>points(c,'damage')>=player.life+player.shield);
+      const heal = rival.life<=8 && legal.filter(c=>points(c,'heal')).sort((a,b)=>a.cost-b.cost)[0];
+      const choice = lethal || heal || high('damage') || high('shield') || legal[0];
+      if (!choice) break;
+      cast(rival,player,rival.hand.indexOf(choice));
+    }
+    if (!duel.winner) { duel.round++; start(player,rival); }
+  }
+  draw(player,5);
+  draw(rival,5);
+  start(player,rival);
+  return duel;
+}
+// INTERFACE
+const query = new URLSearchParams(location.search);
+const seed = Number(query.get('seed') ?? 1) >>> 0;
+const scene = query.get('shot');
+const table=document.querySelector('#table'), overlay=document.querySelector('#overlay');
+const hint=document.querySelector('#hint'), soundButton=document.querySelector('#sound');
+const glyph=kind=>`<span class="glyph ${kind.toLowerCase()}" aria-hidden="true"></span>`;
+const effectWords={damage:'Deal',burn:'Burn',heal:'Heal',shield:'Shield',draw:'Draw'};
+const replayMoves={
+  // Digits are hand keys; zero ends the round. No replay changes a mage directly.
+  play:[3,2,0,3,3,0,5,0,3,3,0,0,3,4],
+  win:[5,2,0,4,2,0,1,2,0,2,3,0,5,4,0,1,0,4,2,0,1],
+  loss:[4,0,4,4,0,1,1,0,1,1,0,3,4,3,0,1,0,1,0],
+};
+let duel=null, audio=null, audible=true;
+const sounds={play:[392,586],hurt:[178,118],win:[392,494,587,784],loss:[330,262,196,131]};
+function wakeAudio(){
+  if(!audible || !window.AudioContext) return;
+  audio ??= new AudioContext();
+  if(audio.state==='suspended') audio.resume().catch(()=>{});
+}
+function tone(event){
+  if(!audible || audio?.state!=='running') return;
+  sounds[event].forEach((hz,i)=>{
+    const at=audio.currentTime+i*((event==='hurt' || event==='play') ? .045 : .105);
+    const osc=audio.createOscillator(), gain=audio.createGain();
+    osc.type=event==='hurt'?'triangle':'sine';
+    osc.frequency.value=hz;
+    gain.gain.setValueAtTime(.001,at);
+    gain.gain.exponentialRampToValueAtTime(.11,at+.012);
+    gain.gain.exponentialRampToValueAtTime(.001,at+.22);
+    osc.connect(gain).connect(audio.destination);
+    osc.start(at);
+    osc.stop(at+.23);
+  });
+}
+function cardMarkup(card,index,energy=3){
+  return `<button class="card ${card.element.toLowerCase()}" data-index="${index}" ${card.cost>energy?'disabled':''}><span class="cost" aria-label="Cost ${card.cost}">${card.cost}</span><span class="key">KEY ${index+1}</span>${glyph(card.element)}<span class="element">${card.element}</span><strong class="card-name">${card.name}</strong><span class="effects">${card.effects.map(([kind,n])=>`<span>${effectWords[kind]} <b>${n}</b></span>`).join('')}</span></button>`;
+}
+function chronicle(entries){
+  return `<div class="log" aria-label="Battle log"><span class="label">Battle log · Last three spells</span>${entries.length?entries.slice(-3).map(e=>`<div class="log-row"><time>R${String(e.round).padStart(2,'0')}</time><b class="${e.who}">${e.who}</b><strong>${e.card}</strong><span>${e.detail}</span></div>`).join(''):'<p class="log-empty">The ring waits for your opening spell.</p>'}</div>`;
+}
+const subtitle=m=>m.name==='Marin'?'THE TIDE CALLER':'THE EMBER WITCH';
+function rail(m){
+  const marine=m.name==='Marin';
+  return `<div class="rail ${marine?'marine':''}" aria-label="${m.name}, Life ${m.life}, Shield ${m.shield}, Burn ${m.burn}"><div class="portrait">${glyph(marine?'Tide':'Ember')}</div><div class="marshal"><span class="eyebrow">${marine?'YOU · PLAYER':'CPU · OPPONENT'}</span><strong>${m.name.toUpperCase()}</strong><small>${subtitle(m)}</small></div><div class="stats">${['life','shield','burn'].map(k=>`<div class="stat ${k==='burn'&&m[k]?'lit':''}"><b data-stat="${k}">${m[k]}</b><span>${k}</span></div>`).join('')}</div></div>`;
+}
+function paintTable(){
+  const {player:p,rival:r,round,log}=duel;
+  table.hidden=false;
+  overlay.hidden=true;
+  hint.textContent='KEYS 1–5  ·  CAST SPELL     /     SPACE  ·  END TURN';
+  table.innerHTML=`
+    <div class="foe">${rail(r)}<div class="rack"><div class="rack-copy"><span class="label">Pyra’s hand</span><strong>Veiled spells</strong><small>${r.hand.length} in hand &nbsp; / &nbsp; ${r.deck.length} in deck</small></div><div class="backs" aria-label="${r.hand.length} face-down cards">${Array.from({length:5},(_,i)=>`<div class="back ${i>=r.hand.length?'spent':''}" aria-hidden="true">${glyph(i<r.hand.length?'Moon':'Star')}</div>`).join('')}</div></div></div>
+    <div class="middle">${chronicle(log)}<div class="turnbox"><div><span class="label">The Astral Ring</span><strong>Round ${String(round).padStart(2,'0')}</strong><small>Marin to act · Pyra replies after you</small></div><div class="turn-emblem">${glyph('Star')}</div></div><div class="turnbox energy"><div><span class="label">Your energy</span><strong id="energy">${p.energy}<small> / 3</small></strong></div><div class="pips" aria-hidden="true">${Array.from({length:3},(_,i)=>`<span class="pip ${i<p.energy?'on':''}"></span>`).join('')}</div></div></div>
+    <div class="bottom">${rail(p)}<div class="hand" aria-label="Your hand">${p.hand.map((c,i)=>cardMarkup(c,i,p.energy)).join('')}${p.hand.length<5?`<div class="archive" aria-label="Your draw pile">${glyph('Moon')}<strong>${p.deck.length}</strong><span class="label">Draw pile</span><small>${p.discard.length} DISCARDED</small></div>`:''}</div><div class="command"><span class="label">Pass to Pyra</span><button class="gold-button" id="end">END TURN</button><small>SPACE BAR</small></div></div>`;
+}
+function seal(name,element,life){
+  const sea=element==='Tide';
+  return `<aside class="seal ${sea?'sea':''} ${life===0?'fallen':''}"><div class="sigil">${glyph(element)}</div><strong>${name}</strong><small>${sea?'THE TIDE CALLER':'THE EMBER WITCH'}</small>${life!==undefined?`<div class="final-life">${life} <small> LIFE</small></div>`:''}</aside>`;
+}
+function paintOverlay(){
+  table.hidden=true;
+  overlay.hidden=false;
+  const done=duel?.winner, win=done===duel?.player;
+  const center=done ? `<div class="hero result ${win?'':'loss'}"><span class="label">Duel complete · Round ${duel.round}</span><h1>${win?'VICTORY':'DEFEAT'}</h1><h2>${win?'Pyra falls':'Marin falls'}</h2><div class="ruleline">✦ &nbsp; FINAL SPELL: ${duel.finisher.toUpperCase()} &nbsp; ✦</div>${chronicle(duel.log)}<button class="gold-button" id="begin">REMATCH</button><span class="prompt">Click or press Enter to duel again</span></div>` : `<div class="hero"><span class="label">A spellcraft game for one challenger</span><h1>EMBER <i>&amp;</i> TIDE</h1><h2>An Arcane Card Duel</h2><div class="ruleline">✦</div><p>First mage to fall loses.<br>Click a card or press 1–5 to play it; Space ends your turn.</p><button class="gold-button" id="begin">ENTER THE RING</button><span class="prompt">Click or press Enter to begin</span></div>`;
+  overlay.innerHTML=seal('PYRA','Ember',done?duel.rival.life:undefined)+center+seal('MARIN','Tide',done?duel.player.life:undefined);
+  hint.textContent=done?'ENTER  ·  REMATCH':'ENTER  ·  BEGIN DUEL';
+}
+function paint(){ if(duel && !duel.winner) paintTable(); else paintOverlay(); }
+function begin(){ wakeAudio(); duel=createDuel(seed,tone); paint(); }
+function act(key){
+  if(!duel || duel.winner) return;
+  wakeAudio();
+  if(key===0) { duel.end(); paint(); }
+  else if(duel.play(key-1)) paint();
+}
+document.addEventListener('click',event=>{
+  const button=event.target.closest('button');
+  if(button===soundButton){
+    audible=!audible;
+    soundButton.setAttribute('aria-pressed',String(audible));
+    soundButton.textContent=audible?'♪ SOUND':'♪ SOUND OFF';
+    if(audible) wakeAudio();
+  } else if(button?.id==='begin') begin();
+  else if(button?.id==='end') act(0);
+  else if(button?.matches('.card') && button.closest('#table')) act(Number(button.dataset.index)+1);
+});
+document.addEventListener('keydown',event=>{
+  if(event.repeat || event.altKey || event.ctrlKey || event.metaKey || scene==='atlas') return;
+  if(event.key==='Enter' && (!duel || duel.winner) && event.target!==soundButton){ event.preventDefault(); begin(); }
+  if(duel && !duel.winner && event.key===' '){ event.preventDefault(); act(0); }
+  if(duel && !duel.winner && /^[1-5]$/.test(event.key)){ event.preventDefault(); act(Number(event.key)); }
+});
+if(scene==='atlas'){
+  overlay.hidden=true;
+  hint.textContent='CARD LIBRARY  ·  SIXTEEN SPELLS';
+  const atlas=document.createElement('section');
+  atlas.className='atlas'; atlas.setAttribute('aria-label','Card library');
+  atlas.innerHTML=[cards.slice(0,8),cards.slice(8)].map(row=>`<div class="hand">${row.map((c,i)=>cardMarkup(c,i%5)).join('')}</div>`).join('');
+  document.querySelector('#frame').append(atlas);
+} else {
+  if(Object.hasOwn(replayMoves,scene)){
+    duel=createDuel(seed,tone);
+    for(const key of replayMoves[scene]) {
+      if(duel.winner) break;
+      if(key===0) duel.end(); else duel.play(key-1);
+    }
+  }
+  paint();
+}
+</script>
+</body>
+</html>
