@@ -167,14 +167,14 @@ function createDuel(seed, sound = () => {}) {
 // INTERFACE
 const query = new URLSearchParams(location.search);
 const scene = query.get('shot');
-const seed = Number(query.get('seed') ?? (scene==='play' ? 63 : 1)) >>> 0;
+const seed = Number(query.get('seed') ?? (scene==='play' ? 278 : 1)) >>> 0;
 const table=document.querySelector('#table'), overlay=document.querySelector('#overlay');
 const hint=document.querySelector('#hint'), soundButton=document.querySelector('#sound');
 const glyph=kind=>`<span class="glyph ${kind.toLowerCase()}" aria-hidden="true"></span>`;
 const effectWords={damage:'Deal',burn:'Burn',heal:'Heal',shield:'Shield',draw:'Draw'};
 const replayMoves={
   // Digits are hand keys; zero ends the round. No replay changes a mage directly.
-  play:[2,0,4,3,0,1,5,0,3,0,2,2,2,0,1,2,3,0],
+  play:[2,4,0,3,0,2,1,0,3,0,1,1,0],
   win:[5,2,0,4,2,0,1,2,0,2,3,0,5,4,0,1,0,4,2,0,1],
   loss:[4,0,4,4,0,1,1,0,1,1,0,3,4,3,0,1,0,1,0],
 };
@@ -229,7 +229,7 @@ function paintOverlay(){
   table.hidden=true;
   overlay.hidden=false;
   const done=duel?.winner, win=done===duel?.player;
-  const center=done ? `<div class="hero result ${win?'':'loss'}"><span class="label">Duel complete · Round ${duel.round}</span><h1>${win?'VICTORY':'DEFEAT'}</h1><h2>${win?'Pyra falls':'Marin falls'}</h2><div class="ruleline">✦ &nbsp; FINAL SPELL: ${duel.finisher.toUpperCase()} &nbsp; ✦</div>${chronicle(duel.log)}<button class="gold-button" id="begin">REMATCH</button><span class="prompt">Click or press Enter to duel again</span></div>` : `<div class="hero"><span class="label">A spellcraft game for one challenger</span><h1>EMBER <i>&amp;</i> TIDE</h1><h2>An Arcane Card Duel</h2><div class="ruleline">✦</div><p>First mage to fall loses.<br>Click a card or press 1–5 to play it; Space ends your turn.</p><button class="gold-button" id="begin">ENTER THE RING</button><span class="prompt">Click or press Enter to begin</span></div>`;
+  const center=done ? `<div class="hero result ${win?'':'loss'}"><span class="label">Duel complete · Round ${duel.round}</span><h1>${win?'VICTORY':'DEFEAT'}</h1><h2>${win?'Pyra falls':'Marin falls'}</h2><div class="ruleline">✦ &nbsp; FINAL SPELL: ${duel.finisher.toUpperCase()} &nbsp; ✦</div>${chronicle(duel.log)}<button class="gold-button" id="begin">REMATCH</button><span class="prompt">Click or press Enter to duel again</span></div>` : `<div class="hero"><span class="label">A spellcraft game for one challenger</span><h1>EMBER <i>&amp;</i> TIDE</h1><h2>An Arcane Card Duel</h2><div class="ruleline">✦</div><p>Spend 3 Energy a turn on spells — Shield soaks damage before Life, and the first mage to fall loses.<br>Click a card or press 1–5 to play it; Space ends your turn.</p><button class="gold-button" id="begin">ENTER THE RING</button><span class="prompt">Click or press Enter to begin</span></div>`;
   overlay.innerHTML=seal('PYRA','Ember',done?duel.rival.life:undefined)+center+seal('MARIN','Tide',done?duel.player.life:undefined);
   hint.textContent=done?'ENTER  ·  REMATCH':'ENTER  ·  BEGIN DUEL';
 }
